@@ -27,11 +27,24 @@ export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
   const rankGroups = countRanks(sorted)
 
+  const trips: Card[][] = []
   const pairs: Card[][] = []
   const singles: Card[] = []
   for (const [, group] of rankGroups) {
-    if (group.length === 2) pairs.push(group)
+    if (group.length === 3) trips.push(group)
+    else if (group.length === 2) pairs.push(group)
     else singles.push(...group)
+  }
+
+  // Three of a Kind
+  if (trips.length === 1 && pairs.length === 0) {
+    const trip = trips[0]
+    const kickers = sortByRankDesc(singles)
+    return {
+      category: HandCategory.THREE_OF_A_KIND,
+      chosen5: [...trip, ...kickers],
+      rankValues: [rankValue(trip[0].rank), ...kickers.map(c => rankValue(c.rank))],
+    }
   }
 
   // Two Pair
