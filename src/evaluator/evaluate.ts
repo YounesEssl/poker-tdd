@@ -34,6 +34,17 @@ export function evaluate5(hand: Card[]): HandResult {
     else singles.push(...group)
   }
 
+  // Two Pair
+  if (pairs.length === 2) {
+    const sortedPairs = pairs.sort((a, b) => rankValue(b[0].rank) - rankValue(a[0].rank))
+    const kickers = sortByRankDesc(singles)
+    return {
+      category: HandCategory.TWO_PAIR,
+      chosen5: [...sortedPairs[0], ...sortedPairs[1], ...kickers],
+      rankValues: [rankValue(sortedPairs[0][0].rank), rankValue(sortedPairs[1][0].rank), rankValue(kickers[0].rank)],
+    }
+  }
+
   // One Pair
   if (pairs.length === 1) {
     const pair = pairs[0]
