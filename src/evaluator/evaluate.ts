@@ -23,6 +23,29 @@ function countRanks(cards: Card[]): Map<Rank, Card[]> {
   return map
 }
 
+function detectStraight(sorted: Card[]): HandResult | null {
+  const values = sorted.map(c => rankValue(c.rank))
+
+  const isNormalStraight = values.every((v, i) => i === 0 || values[i - 1] - v === 1)
+  if (isNormalStraight) {
+    return {
+      category: HandCategory.STRAIGHT,
+      chosen5: sorted,
+      rankValues: [values[0]],
+    }
+  }
+
+  if (values[0] === 14 && values[1] === 5 && values[2] === 4 && values[3] === 3 && values[4] === 2) {
+    return {
+      category: HandCategory.STRAIGHT,
+      chosen5: [...sorted.slice(1), sorted[0]],
+      rankValues: [5],
+    }
+  }
+
+  return null
+}
+
 export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
   const rankGroups = countRanks(sorted)
@@ -67,6 +90,12 @@ export function evaluate5(hand: Card[]): HandResult {
       chosen5: [...pair, ...kickers],
       rankValues: [rankValue(pair[0].rank), ...kickers.map(c => rankValue(c.rank))],
     }
+  }
+
+  // Straight
+  if (trips.length === 0 && pairs.length === 0) {
+    const straightResult = detectStraight(sorted)
+    if (straightResult) return straightResult
   }
 
   // High Card
