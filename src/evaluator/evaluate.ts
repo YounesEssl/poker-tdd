@@ -50,13 +50,26 @@ export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
   const rankGroups = countRanks(sorted)
 
+  const quads: Card[][] = []
   const trips: Card[][] = []
   const pairs: Card[][] = []
   const singles: Card[] = []
   for (const [, group] of rankGroups) {
-    if (group.length === 3) trips.push(group)
+    if (group.length === 4) quads.push(group)
+    else if (group.length === 3) trips.push(group)
     else if (group.length === 2) pairs.push(group)
     else singles.push(...group)
+  }
+
+  // Four of a Kind
+  if (quads.length === 1) {
+    const quad = quads[0]
+    const kicker = sortByRankDesc([...singles, ...pairs.flat(), ...trips.flat()])[0]
+    return {
+      category: HandCategory.FOUR_OF_A_KIND,
+      chosen5: [...quad, kicker],
+      rankValues: [rankValue(quad[0].rank), rankValue(kicker.rank)],
+    }
   }
 
   // Full House
