@@ -49,6 +49,7 @@ function detectStraight(sorted: Card[]): HandResult | null {
 export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
   const rankGroups = countRanks(sorted)
+  const isFlush = sorted.every(c => c.suit === sorted[0].suit)
 
   const quads: Card[][] = []
   const trips: Card[][] = []
@@ -80,6 +81,19 @@ export function evaluate5(hand: Card[]): HandResult {
       category: HandCategory.FULL_HOUSE,
       chosen5: [...trip, ...pair],
       rankValues: [rankValue(trip[0].rank), rankValue(pair[0].rank)],
+    }
+  }
+
+  // Straight Flush / Flush (flush implies all unique ranks with valid input)
+  if (isFlush) {
+    const straightResult = detectStraight(sorted)
+    if (straightResult) {
+      return { ...straightResult, category: HandCategory.STRAIGHT_FLUSH }
+    }
+    return {
+      category: HandCategory.FLUSH,
+      chosen5: sorted,
+      rankValues: sorted.map(c => rankValue(c.rank)),
     }
   }
 
@@ -116,25 +130,9 @@ export function evaluate5(hand: Card[]): HandResult {
     }
   }
 
-  // Flush / Straight Flush
-  const isFlush = sorted.every(c => c.suit === sorted[0].suit)
-  if (isFlush) {
-    const straightResult = detectStraight(sorted)
-    if (straightResult) {
-      return { ...straightResult, category: HandCategory.STRAIGHT_FLUSH }
-    }
-    return {
-      category: HandCategory.FLUSH,
-      chosen5: sorted,
-      rankValues: sorted.map(c => rankValue(c.rank)),
-    }
-  }
-
   // Straight
-  if (trips.length === 0 && pairs.length === 0) {
-    const straightResult = detectStraight(sorted)
-    if (straightResult) return straightResult
-  }
+  const straightResult = detectStraight(sorted)
+  if (straightResult) return straightResult
 
   // High Card
   const values = sorted.map(c => rankValue(c.rank))
