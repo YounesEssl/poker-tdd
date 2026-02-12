@@ -13,20 +13,23 @@ function sortByRankDesc(cards: Card[]): Card[] {
   return [...cards].sort((a, b) => rankValue(b.rank) - rankValue(a.rank))
 }
 
+function countRanks(cards: Card[]): Map<Rank, Card[]> {
+  const map = new Map<Rank, Card[]>()
+  for (const c of cards) {
+    const existing = map.get(c.rank) || []
+    existing.push(c)
+    map.set(c.rank, existing)
+  }
+  return map
+}
+
 export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
-
-  // Count cards by rank
-  const rankMap = new Map<Rank, Card[]>()
-  for (const c of sorted) {
-    const existing = rankMap.get(c.rank) || []
-    existing.push(c)
-    rankMap.set(c.rank, existing)
-  }
+  const rankGroups = countRanks(sorted)
 
   const pairs: Card[][] = []
   const singles: Card[] = []
-  for (const [, group] of rankMap) {
+  for (const [, group] of rankGroups) {
     if (group.length === 2) pairs.push(group)
     else singles.push(...group)
   }
