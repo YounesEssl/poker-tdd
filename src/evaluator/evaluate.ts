@@ -59,6 +59,17 @@ export function evaluate5(hand: Card[]): HandResult {
     else singles.push(...group)
   }
 
+  // Full House
+  if (trips.length === 1 && pairs.length === 1) {
+    const trip = trips[0]
+    const pair = pairs[0]
+    return {
+      category: HandCategory.FULL_HOUSE,
+      chosen5: [...trip, ...pair],
+      rankValues: [rankValue(trip[0].rank), rankValue(pair[0].rank)],
+    }
+  }
+
   // Three of a Kind
   if (trips.length === 1 && pairs.length === 0) {
     const trip = trips[0]
