@@ -116,9 +116,13 @@ export function evaluate5(hand: Card[]): HandResult {
     }
   }
 
-  // Flush
+  // Flush / Straight Flush
   const isFlush = sorted.every(c => c.suit === sorted[0].suit)
   if (isFlush) {
+    const straightResult = detectStraight(sorted)
+    if (straightResult) {
+      return { ...straightResult, category: HandCategory.STRAIGHT_FLUSH }
+    }
     return {
       category: HandCategory.FLUSH,
       chosen5: sorted,
