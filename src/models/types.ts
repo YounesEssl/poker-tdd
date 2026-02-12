@@ -23,3 +23,13 @@ export interface HandResult {
   chosen5: Card[]
   rankValues: number[]
 }
+
+export interface PlayerResult {
+  playerIndex: number
+  handResult: HandResult
+}
+
+export interface GameResult {
+  winners: PlayerResult[]
+  allResults: PlayerResult[]
+}
