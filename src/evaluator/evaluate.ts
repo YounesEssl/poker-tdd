@@ -1,4 +1,5 @@
 import { Card, HandCategory, HandResult, Rank } from '../models/types'
+import { combinations } from '../utils/combinations'
 
 const RANK_VALUES: Record<Rank, number> = {
   '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
@@ -84,7 +85,7 @@ export function evaluate5(hand: Card[]): HandResult {
     }
   }
 
-  // Straight Flush / Flush (flush implies all unique ranks with valid input)
+  // Straight Flush / Flush
   if (isFlush) {
     const straightResult = detectStraight(sorted)
     if (straightResult) {
@@ -141,4 +142,25 @@ export function evaluate5(hand: Card[]): HandResult {
     chosen5: sorted,
     rankValues: values,
   }
+}
+
+function compareHandResults(a: HandResult, b: HandResult): number {
+  if (a.category !== b.category) return a.category - b.category
+  for (let i = 0; i < a.rankValues.length; i++) {
+    if (a.rankValues[i] !== b.rankValues[i]) return a.rankValues[i] - b.rankValues[i]
+  }
+  return 0
+}
+
+export function bestHand(holeCards: Card[], board: Card[]): HandResult {
+  const allCards = [...holeCards, ...board]
+  const combos = combinations(allCards, 5)
+  let best = evaluate5(combos[0])
+  for (let i = 1; i < combos.length; i++) {
+    const current = evaluate5(combos[i])
+    if (compareHandResults(current, best) > 0) {
+      best = current
+    }
+  }
+  return best
 }
