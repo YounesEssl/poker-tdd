@@ -15,8 +15,35 @@ function sortByRankDesc(cards: Card[]): Card[] {
 
 export function evaluate5(hand: Card[]): HandResult {
   const sorted = sortByRankDesc(hand)
-  const values = sorted.map(c => rankValue(c.rank))
 
+  // Count cards by rank
+  const rankMap = new Map<Rank, Card[]>()
+  for (const c of sorted) {
+    const existing = rankMap.get(c.rank) || []
+    existing.push(c)
+    rankMap.set(c.rank, existing)
+  }
+
+  const pairs: Card[][] = []
+  const singles: Card[] = []
+  for (const [, group] of rankMap) {
+    if (group.length === 2) pairs.push(group)
+    else singles.push(...group)
+  }
+
+  // One Pair
+  if (pairs.length === 1) {
+    const pair = pairs[0]
+    const kickers = sortByRankDesc(singles)
+    return {
+      category: HandCategory.ONE_PAIR,
+      chosen5: [...pair, ...kickers],
+      rankValues: [rankValue(pair[0].rank), ...kickers.map(c => rankValue(c.rank))],
+    }
+  }
+
+  // High Card
+  const values = sorted.map(c => rankValue(c.rank))
   return {
     category: HandCategory.HIGH_CARD,
     chosen5: sorted,
